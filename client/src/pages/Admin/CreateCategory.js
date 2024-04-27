@@ -12,6 +12,7 @@ const CreateCategory = () => {
   const [selected, setSelected] = useState(null);
   const [updatedName, setUpdatedName] = useState("");
   //handle Form
+  //test
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
