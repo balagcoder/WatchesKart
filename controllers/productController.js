@@ -4,22 +4,13 @@ import orderModel from "../models/orderModel.js";
 
 import fs from "fs";
 import slugify from "slugify";
-//import braintree from "braintree";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-/*//payment gateway
-var gateway = new braintree.BraintreeGateway({
-  environment: braintree.Environment.Sandbox,
-  merchantId: process.env.BRAINTREE_MERCHANT_ID,
-  publicKey: process.env.BRAINTREE_PUBLIC_KEY,
-  privateKey: process.env.BRAINTREE_PRIVATE_KEY,
-}); */
-
 export const createProductController = async (req, res) => {
   try {
-    const { name, description, price, category, serialnumber,model} =
+    const { name, description, price, category, serialnumber, brand } =
       req.fields;
     const { photo } = req.files;
     //alidation
@@ -35,7 +26,7 @@ export const createProductController = async (req, res) => {
       case !serialnumber:
         return res.status(500).send({ error: "Serial number is Required" });
       case !brand:
-          return res.status(500).send({ error: "Brand is Required" });
+        return res.status(500).send({ error: "Brand is Required" });
       case photo && photo.size > 1000000:
         return res
           .status(500)
@@ -148,7 +139,7 @@ export const deleteProductController = async (req, res) => {
 //upate products
 export const updateProductController = async (req, res) => {
   try {
-    const { name, description, price, category, serialnumber,brand } =
+    const { name, description, price, category, serialnumber, brand } =
       req.fields;
     const { photo } = req.files;
     //alidation
@@ -162,9 +153,9 @@ export const updateProductController = async (req, res) => {
       case !category:
         return res.status(500).send({ error: "Category is Required" });
       case !serialnumber:
-          return res.status(500).send({ error: "Serial number is Required" });
+        return res.status(500).send({ error: "Serial number is Required" });
       case !brand:
-            return res.status(500).send({ error: "Brand is Required" });
+        return res.status(500).send({ error: "Brand is Required" });
       case photo && photo.size > 1000000:
         return res
           .status(500)
@@ -329,54 +320,64 @@ export const productCategoryController = async (req, res) => {
     });
   }
 };
-/*
-//payment gateway api
-//token
-export const braintreeTokenController = async (req, res) => {
+export const createOrderController = async (req, res) => {
   try {
-    gateway.clientToken.generate({}, function (err, response) {
-      if (err) {
-        res.status(500).send(err);
-      } else {
-        res.send(response);
-      }
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
+    const { buyer } = req.body;
+    const products = req.body.products;
+    const { totalcost } = req.body;
+    const { mplan } = req.body.maintenancePlan;
 
-//payment
-export const brainTreePaymentController = async (req, res) => {
-  try {
-    const { nonce, cart } = req.body;
-    let total = 0;
-    cart.map((i) => {
-      total += i.price;
+    // Validation
+    if (!products || !buyer) {
+      return res
+        .status(400)
+        .send({ error: "Products and buyer information are required" });
+    }
+
+    // Create a new order document
+    console.log(products, " + ", buyer);
+    const order = new orderModel({ products, buyer, totalcost, mplan });
+
+    // Save the order to the database
+    await order.save();
+
+    res.status(201).send({
+      success: true,
+      message: "Order created successfully",
+      order,
     });
-    let newTransaction = gateway.transaction.sale(
-      {
-        amount: total,
-        paymentMethodNonce: nonce,
-        options: {
-          submitForSettlement: true,
-        },
-      },
-      function (error, result) {
-        if (result) {
-          const order = new orderModel({
-            products: cart,
-            payment: result,
-            buyer: req.user._id,
-          }).save();
-          res.json({ ok: true });
-        } else {
-          res.status(500).send(error);
-        }
-      }
-    );
   } catch (error) {
     console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Error in creating order",
+    });
   }
 };
-*/
+// Define getOrderController function
+export const getOrderController = async (req, res) => {
+  try {
+    // Retrieve authenticated user ID from the request object
+    const userId = req.user._id; // Assuming the user ID is stored in req.user
+
+    // Query orders associated with the authenticated user
+    const orders = await orderModel
+      .find({ buyer: userId })
+      .populate("products", "totalcost");
+
+    // Return the orders associated with the authenticated user
+    res.status(200).send({
+      success: true,
+      message: "User Orders Fetched Successfully",
+      orders,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: "Error while fetching user orders",
+      error: error.message,
+    });
+  }
+};

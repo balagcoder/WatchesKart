@@ -19,6 +19,8 @@ const HomePage = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [includeMaintenancePlan, setIncludeMaintenancePlan] = useState(false);  //maintenance plan
+
 
   //get all cat
   const getAllCategory = async () => {
@@ -180,18 +182,15 @@ const HomePage = () => {
                       More Details
                     </button>
                     <button
-                      className="btn btn-dark ms-1"
-                      onClick={() => {
-                        setCart([...cart, p]);
-                        localStorage.setItem(
-                          "cart",
-                          JSON.stringify([...cart, p])
-                        );
-                        toast.success("Item Added to cart");
-                      }}
-                    >
-                      ADD TO CART
-                    </button>
+                       className="btn btn-dark ms-1"
+                       onClick={() => {
+                      setCart([...cart, p]);
+                     localStorage.setItem("cart", JSON.stringify([...cart, p]));
+                      toast.success("Item Added to cart");
+                             }}
+                      >
+                        ADD TO CART
+                      </button>
                   </div>
                 </div>
               </div>

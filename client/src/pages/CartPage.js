@@ -5,11 +5,13 @@ import { useAuth } from "../context/auth";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Checkbox } from "antd";
 import "../styles/CartStyles.css";
 
 const CartPage = () => {
   const [auth] = useAuth();
   const [cart, setCart] = useCart();
+  const [maintenancePlan, setMaintenancePlan] = useState({});
   const navigate = useNavigate();
 
   // Total price calculation
@@ -18,6 +20,10 @@ const CartPage = () => {
       let total = 0;
       cart?.forEach((item) => {
         total += item.price;
+        // Check if maintenance plan is included for the current product
+        if (maintenancePlan[item._id]) {
+          total += 5; // Add $5 for each product with the maintenance plan
+        }
       });
       return total.toLocaleString("en-US", {
         style: "currency",
@@ -32,25 +38,42 @@ const CartPage = () => {
   const removeCartItem = (productId) => {
     try {
       const updatedCart = cart.filter((item) => item._id !== productId);
+      const updatedMaintenancePlan = { ...maintenancePlan };
+      delete updatedMaintenancePlan[productId];
       setCart(updatedCart);
+      setMaintenancePlan(updatedMaintenancePlan);
       localStorage.setItem("cart", JSON.stringify(updatedCart));
     } catch (error) {
       console.log(error);
     }
   };
 
-  // Place order function
-  const placeOrder = async () => {
+  // Handle place order function
+  const handlePlaceOrder = async () => {
     try {
-      // Your order placement logic here
-      // This can involve making an API request to your backend to store the order details
-      // For demonstration purposes, let's just clear the cart and show a success message
+      const totalcost = totalPrice();
+      const products = cart; // Pass the cart as products
+      const buyer = auth?.user?._id;
+
+      console.log(products);
+
+      // Send a POST request to create the order
+      const response = await axios.post("/api/v1/order/create-order", {
+        products,
+        buyer,
+        totalcost,
+        maintenancePlan,
+      });
+
+      // Handle success response
+      console.log("Order created successfully:", response.data);
       localStorage.removeItem("cart");
       setCart([]);
       navigate("/dashboard/user/orders");
-      toast.success("Order Placed Successfully");
+      // toast.success("Order Placed Successfully");
     } catch (error) {
-      console.log(error);
+      // Handle error
+      console.error("Error creating order:", error);
       toast.error("Failed to place order");
     }
   };
@@ -101,6 +124,19 @@ const CartPage = () => {
                       Remove
                     </button>
                   </div>
+                  <div className="col-md-12">
+                    {/* Maintenance plan checkbox */}
+                    <Checkbox
+                      onChange={(e) => {
+                        setMaintenancePlan({
+                          ...maintenancePlan,
+                          [product._id]: e.target.checked,
+                        });
+                      }}
+                    >
+                      Include Maintenance Plan 5$ which covers 2 years
+                    </Checkbox>
+                  </div>
                 </div>
               ))}
             </div>
@@ -109,41 +145,22 @@ const CartPage = () => {
               <p>Total | Checkout | Payment</p>
               <hr />
               <h4>Total : {totalPrice()} </h4>
-              <div className="mb-3">
-                {auth?.user?.address ? (
-                  <>
-                    <h4>Current Address</h4>
-                    <h5>{auth?.user?.address}</h5>
-                    <button
-                      className="btn btn-outline-warning"
-                      onClick={() => navigate("/dashboard/user/profile")}
-                    >
-                      Update Address
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className="btn btn-outline-warning"
-                    onClick={() =>
-                      navigate("/login", {
-                        state: "/cart",
-                      })
-                    }
-                  >
-                    Please Login to Checkout
-                  </button>
-                )}
-              </div>
-              <button
-                className="btn btn-primary"
-                onClick={() =>
-                  navigate("/orders", {
-                    state: "/cart",
-                  })   
-                }           
-              >
-                Place Order
-              </button>
+              {auth?.token ? (
+                <button className="btn btn-primary" onClick={handlePlaceOrder}>
+                  Place Order
+                </button>
+              ) : (
+                <button
+                  className="btn btn-primary"
+                  onClick={() =>
+                    navigate("/login", {
+                      state: "/cart",
+                    })
+                  }
+                >
+                  Please Login to Checkout
+                </button>
+              )}
             </div>
           </div>
         </div>

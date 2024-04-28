@@ -1,26 +1,11 @@
 import express from "express";
-import {
-  //brainTreePaymentController,
-  //braintreeTokenController,
-  createProductController,
-  deleteProductController,
-  getProductController,
-  getSingleProductController,
-  productCategoryController,
-  productCountController,
-  productFiltersController,
-  productListController,
-  productPhotoController,
-  realtedProductController,
-  searchProductController,
-  updateProductController,
-} from "../controllers/productController.js";
+import { createProductController, deleteProductController, getProductController, getSingleProductController, productCategoryController, productCountController, productFiltersController, productListController, productPhotoController, realtedProductController, searchProductController, updateProductController,createOrderController } from "../controllers/productController.js";
 import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 import formidable from "express-formidable";
 
 const router = express.Router();
 
-//routes
+// Create product
 router.post(
   "/create-product",
   requireSignIn,
@@ -28,7 +13,8 @@ router.post(
   formidable(),
   createProductController
 );
-//routes
+
+// Update product
 router.put(
   "/update-product/:pid",
   requireSignIn,
@@ -37,41 +23,37 @@ router.put(
   updateProductController
 );
 
-//get products
+// Get products
 router.get("/get-product", getProductController);
 
-//single product
+// Single product
 router.get("/get-product/:slug", getSingleProductController);
 
-//get photo
+// Get photo
 router.get("/product-photo/:pid", productPhotoController);
 
-//delete rproduct
+// Delete product
 router.delete("/delete-product/:pid", deleteProductController);
 
-//filter product
+// Filter product
 router.post("/product-filters", productFiltersController);
 
-//product count
+// Product count
 router.get("/product-count", productCountController);
 
-//product per page
+// Product per page
 router.get("/product-list/:page", productListController);
 
-//search product
+// Search product
 router.get("/search/:keyword", searchProductController);
 
-//similar product
+// Similar product
 router.get("/related-product/:pid/:cid", realtedProductController);
 
-//category wise product
+// Category wise product
 router.get("/product-category/:slug", productCategoryController);
-/*
-//payments routes
-//token
-router.get("/braintree/token", braintreeTokenController);
 
-//payments
-router.post("/braintree/payment", requireSignIn, brainTreePaymentController);
-*/
+// New route for creating orders
+router.post("/create-order", createOrderController); // Adjust middleware as needed
+
 export default router;

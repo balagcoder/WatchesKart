@@ -8,15 +8,24 @@ const orderSchema = new mongoose.Schema(
         ref: "Products",
       },
     ],
-    payment: {},
+    paymentstatus: {
+      type: mongoose.ObjectId,
+      ref: "Payment", // Reference to the Payment model
+    },
     buyer: {
       type: mongoose.ObjectId,
       ref: "users",
     },
+    totalcost: {
+      type: String,
+    },
     status: {
       type: String,
       default: "Not Process",
-      enum: ["Not Process", "Processing", "Shipped", "deliverd", "cancel"],
+    },
+    mplan: {
+      type: String,
+      default: false,
     },
   },
   { timestamps: true }

@@ -79,3 +79,15 @@ filters
   font-weight: bold;
   font-size: 20px !important;
 }
+/* Maintenance Plan */
+.maintenance-plan {
+  margin-top: 20px;
+}
+
+.maintenance-plan label {
+  font-weight: bold;
+}
+
+.maintenance-plan input[type="checkbox"] {
+  margin-right: 5px;
+}

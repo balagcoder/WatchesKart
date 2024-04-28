@@ -16,7 +16,6 @@ const AdminOrders = () => {
     "deliverd",
     "cancel",
   ]);
-  const [changeStatus, setCHangeStatus] = useState("");
   const [orders, setOrders] = useState([]);
   const [auth, setAuth] = useAuth();
   const getOrders = async () => {
@@ -32,16 +31,18 @@ const AdminOrders = () => {
     if (auth?.token) getOrders();
   }, [auth?.token]);
 
-  const handleChange = async (orderId, value) => {
+  const handleChange = async (orderId, status, paymentstatus) => {
     try {
       const { data } = await axios.put(`/api/v1/auth/order-status/${orderId}`, {
-        status: value,
+        status,
+        paymentstatus,
       });
-      getOrders();
+      getOrders(); // Refresh orders after updating
     } catch (error) {
       console.log(error);
     }
   };
+
   return (
     <Layout title={"All Orders Data"}>
       <div className="row dashboard">
@@ -59,7 +60,7 @@ const AdminOrders = () => {
                       <th scope="col">#</th>
                       <th scope="col">Status</th>
                       <th scope="col">Buyer</th>
-                      <th scope="col"> date</th>
+                      {/* <th scope="col"> date</th> */}
                       <th scope="col">Payment</th>
                       <th scope="col">Quantity</th>
                     </tr>
@@ -70,19 +71,33 @@ const AdminOrders = () => {
                       <td>
                         <Select
                           bordered={false}
-                          onChange={(value) => handleChange(o._id, value)}
-                          defaultValue={o?.status}
+                          onChange={(value) =>
+                            handleChange(o._id, value, o.paymentstatus)
+                          }
+                          defaultValue={o.status}
                         >
-                          {status.map((s, i) => (
-                            <Option key={i} value={s}>
-                              {s}
-                            </Option>
-                          ))}
+                          <Option value="Processing">Processing</Option>
+                          <Option value="Delivered">Delivered</Option>
+                          <Option value="Return process">Return process</Option>
+                          <Option value="Return success">Return success</Option>
                         </Select>
                       </td>
+
                       <td>{o?.buyer?.name}</td>
-                      <td>{moment(o?.createAt).fromNow()}</td>
-                      <td>{o?.payment.success ? "Success" : "Failed"}</td>
+                      {/* <td>{moment(o?.createAt).fromNow()}</td> */}
+                      <td>
+                        <Select
+                          bordered={false}
+                          onChange={(value) =>
+                            handleChange(o._id, o.status, value)
+                          }
+                          defaultValue={o.paymentstatus}
+                        >
+                          <Option value="Yes">Yes</Option>
+                          <Option value="No">No</Option>
+                        </Select>
+                      </td>
+
                       <td>{o?.products?.length}</td>
                     </tr>
                   </tbody>

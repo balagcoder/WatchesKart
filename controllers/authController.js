@@ -6,7 +6,7 @@ import JWT from "jsonwebtoken";
 
 export const registerController = async (req, res) => {
   try {
-    const { name, email, password, phone, street,city,state,zip } = req.body;
+    const { name, email, password, phone, street, city, state, zip } = req.body;
     //validations
     if (!name) {
       return res.send({ error: "Name is Required" });
@@ -113,7 +113,7 @@ export const loginController = async (req, res) => {
         city: user.city,
         state: user.state,
         zip: user.zip,
-        role: user.role
+        role: user.role,
       },
       token,
     });
@@ -140,7 +140,7 @@ export const testController = (req, res) => {
 //update prfole
 export const updateProfileController = async (req, res) => {
   try {
-    const { name, email, password, street,city,state,zip, phone } = req.body;
+    const { name, email, password, street, city, state, zip, phone } = req.body;
     const user = await userModel.findById(req.user._id);
     //password
     if (password && password.length < 6) {
@@ -156,7 +156,7 @@ export const updateProfileController = async (req, res) => {
         street: street || user.street,
         city: city || user.city,
         state: state || user.state,
-        zip: zip || user.zip
+        zip: zip || user.zip,
       },
       { new: true }
     );
@@ -212,21 +212,24 @@ export const getAllOrdersController = async (req, res) => {
 };
 
 //order status
+
 export const orderStatusController = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { status } = req.body;
-    const orders = await orderModel.findByIdAndUpdate(
+    const { status, paymentstatus } = req.body;
+
+    const updatedOrder = await orderModel.findByIdAndUpdate(
       orderId,
-      { status },
+      { status, paymentstatus },
       { new: true }
     );
-    res.json(orders);
+
+    res.json(updatedOrder);
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error While Updateing Order",
+      message: "Error while updating order",
       error,
     });
   }
