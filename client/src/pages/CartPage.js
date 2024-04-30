@@ -22,7 +22,7 @@ const CartPage = () => {
         total += item.price;
         // Check if maintenance plan is included for the current product
         if (maintenancePlan[item._id]) {
-          total += 5; // Add $5 for each product with the maintenance plan
+          total += 10; // Add $10 for each product with the maintenance plan
         }
       });
       return total.toLocaleString("en-US", {
@@ -54,7 +54,14 @@ const CartPage = () => {
       const totalcost = totalPrice();
       const products = cart; // Pass the cart as products
       const buyer = auth?.user?._id;
+      let mplan = false; // Define mplan variable
 
+      // Construct mplan object
+      products.forEach((item) => {
+        if (maintenancePlan[item._id]) {
+          mplan = true;
+        }
+      });
       console.log(products);
 
       // Send a POST request to create the order
@@ -62,7 +69,7 @@ const CartPage = () => {
         products,
         buyer,
         totalcost,
-        maintenancePlan,
+        mplan,
       });
 
       // Handle success response
@@ -134,7 +141,7 @@ const CartPage = () => {
                         });
                       }}
                     >
-                      Include Maintenance Plan 5$ which covers 2 years
+                      Maintenance Plan 10$- 2 years
                     </Checkbox>
                   </div>
                 </div>

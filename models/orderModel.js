@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import payments from "./paymentModel.js";
 
 const orderSchema = new mongoose.Schema(
   {
@@ -9,8 +10,8 @@ const orderSchema = new mongoose.Schema(
       },
     ],
     paymentstatus: {
-      type: mongoose.ObjectId,
-      ref: "Payment", // Reference to the Payment model
+      type: String,
+      default: "No",
     },
     buyer: {
       type: mongoose.ObjectId,
@@ -24,11 +25,24 @@ const orderSchema = new mongoose.Schema(
       default: "Not Process",
     },
     mplan: {
-      type: String,
+      type: Boolean,
       default: false,
     },
   },
   { timestamps: true }
 );
+orderSchema.post("findOneAndUpdate", async function (doc) {
+  // Access the updated document
+  const updatedOrder = await this.model.findOne(this.getFilter()).exec();
+
+  // Find the corresponding Payment document based on the orderId
+  const payment = await payments.findOne({ orderId: updatedOrder._id });
+
+  // If a payment document is found, update its paymentstatus field
+  if (payment) {
+    payment.paymentstatus = updatedOrder.paymentstatus;
+    await payment.save();
+  }
+});
 
 export default mongoose.model("Order", orderSchema);

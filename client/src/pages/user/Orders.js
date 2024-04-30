@@ -34,12 +34,22 @@ const Orders = () => {
             {orders?.map((order, index) => (
               <div key={index} className="border shadow mb-3">
                 <div className="p-3">
-                  <h4>Order Details</h4>
-                  {/*<p>Buyer: {order.buyer?.name}</p> */}
-                  <p>Quantity: {order.products?.length}</p>
-                  <p>Total Cost: {order.totalcost}</p>
-                  <p>Payment: {order.paymentstatus}</p>
-                  <p>Status: {order.status}</p>
+                  <p>
+                    <strong>Quantity:</strong> {order.products?.length}
+                  </p>
+                  <p>
+                    <strong>Total Cost:</strong> {order.totalcost}
+                  </p>
+                  <p>
+                    <strong>Payment:</strong> {order.paymentstatus}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {order.status}
+                  </p>
+                  <p>
+                    <strong>Maintenance Plan:</strong>{" "}
+                    {order.mplan ? "Yes, included" : "Not included"}
+                  </p>
                 </div>
                 <div className="container">
                   <h4>Products</h4>

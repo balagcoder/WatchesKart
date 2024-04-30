@@ -5,10 +5,14 @@ const paymentSchema = new mongoose.Schema(
     // payment: {},
     paymentstatus: {
       type: String,
-      default: "No",
+      ref: "Order",
+    },
+    orderId: {
+      type: mongoose.ObjectId,
+      ref: "Order",
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Payment", paymentSchema);
+export default mongoose.model("Payments", paymentSchema);

@@ -1,10 +1,10 @@
 import productModel from "../models/productModel.js";
 import categoryModel from "../models/categoryModel.js";
 import orderModel from "../models/orderModel.js";
-
 import fs from "fs";
 import slugify from "slugify";
 import dotenv from "dotenv";
+import paymentModel from "../models/paymentModel.js";
 
 dotenv.config();
 
@@ -325,7 +325,7 @@ export const createOrderController = async (req, res) => {
     const { buyer } = req.body;
     const products = req.body.products;
     const { totalcost } = req.body;
-    const { mplan } = req.body.maintenancePlan;
+    const mplan = req.body.mplan;
 
     // Validation
     if (!products || !buyer) {
@@ -346,6 +346,14 @@ export const createOrderController = async (req, res) => {
       message: "Order created successfully",
       order,
     });
+    // Create a new payment document
+    const payment = new paymentModel({
+      orderId: order._id,
+      paymentstatus: "No",
+    });
+
+    // Save the payment to the database
+    payment.save();
   } catch (error) {
     console.log(error);
     res.status(500).send({
